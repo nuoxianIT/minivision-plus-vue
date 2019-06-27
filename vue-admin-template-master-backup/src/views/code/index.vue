@@ -93,8 +93,8 @@
             default-active="2"
             class="el-menu-vertical-demo"
             @open="handleSelect" @contextmenu.prevent.native="$easycm($event,$root)">
-           <!-- <right-menu :pop-items="popItems" :mouse="mousePosition" @ListItemClick="list_item_click">
-            </right-menu>-->
+            <!-- <right-menu :pop-items="popItems" :mouse="mousePosition" @ListItemClick="list_item_click">
+             </right-menu>-->
             <!--<context-menu id="context-menu" ref="ctxMenu">
               <ul class="easy-ul">
                 <li @click="">option 1</li>
@@ -197,9 +197,8 @@
         </el-card>
 
         <el-button type="success" @click="generateCode()">代码生成</el-button>
-        <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
-
-
+        <a :download="fileName" :href="filePath" ref="download"></a>
+        <el-button type="primary">确定</el-button>
       </el-form>
     </el-container>
   </el-container>
@@ -213,7 +212,7 @@
     //components: { contextMenu },
     data() {
       return {
-        rightClickMenu:[{
+        rightClickMenu: [{
           text: 'Play Now',
           icon: 'iconfont icon-bofang',  //选填 字体图标 class
           children: [] //选填
@@ -234,6 +233,7 @@
             label: 'gbk'
           }
         ],
+        fileName: '',
         options: [{
           value: '1',
           label: 'MySQL'
@@ -313,6 +313,8 @@
           desc: ''
         },
         dialogVisible: false,
+        aaa: false,
+        filePath: '',
         rules: {
           connectionName: [
             {required: true, message: '请输入名称', trigger: 'blur'}
@@ -355,22 +357,21 @@
       this.loadConnection();
     },
     methods: {
-      popMenu(e){
+      popMenu(e) {
         //alert(1);
         let self = this;
         e.preventDefault();
         //alert(e.button === 2)
-        if(e.button ===2){
+        if (e.button === 2) {
           let x = e.layerX;
           let y = e.layerY;
           self.mousePosition = [x, y];
-        }
-        else if(e.button ===0){
+        } else if (e.button === 0) {
           self.mousePosition = ['close'];
         }
       },
-      list_item_click(it){
-        switch (it){
+      list_item_click(it) {
+        switch (it) {
           case 0:
             alert('第一项被点击');
             break;
@@ -454,7 +455,11 @@
         console.log(this.hostName)
         doPost(JSON.stringify(jsonString), '/code/generate')
           .then(res => {
-            console.log(res)
+            var host = window.location.host;
+            var path = res.data.data.path;
+            this.filePath = host + path
+            console.log(this.filePath)
+            this.$refs.download.click()
           })
       },
       handleKey(key) {
@@ -468,7 +473,7 @@
                temp.push({'key': connection.key});
              }*/
             let idx = indexInJson.length;
-            indexInJson.push({'key': key, 'index': idx, 'tables':[]});
+            indexInJson.push({'key': key, 'index': idx, 'tables': []});
             setLocalStorage('connectionsIndex', JSON.stringify(indexInJson));
             return idx;
           }
@@ -507,15 +512,15 @@
         let that = this;
         //alert(1);
         //console.log(this.connections);
-        doPost(getLocalStorage(connection),"/database/connect")
+        doPost(getLocalStorage(connection), "/database/connect")
           .then(res => {
             //this.tables = res.data.data;
             //alert(that.connections.length);
             console.log(that.connections)
-            for (let i = 0;i< that.connections.length; i++) {
-               if (that.connections[i].key === connection) {
-                 that.connections[i].tables = res.data.data;
-               }
+            for (let i = 0; i < that.connections.length; i++) {
+              if (that.connections[i].key === connection) {
+                that.connections[i].tables = res.data.data;
+              }
             }
             //console.log(that.connections);
 
@@ -523,7 +528,7 @@
 
       },
       handleClick(tableName) {
-       let json = {"tableName":tableName}
+        let json = {"tableName": tableName}
         //alert('click')
         let that = this;
         doPost(json, "/code/getPackageAndClass")
@@ -568,10 +573,11 @@
     color: #ffffff;
   }
 
-  .easy-ul li div:hover{
+  .easy-ul li div:hover {
     background-color: #ffffff !important;
     color: #df5000 !important;
   }
+
   .text {
     font-size: 14px;
   }
