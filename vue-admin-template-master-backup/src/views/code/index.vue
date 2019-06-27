@@ -30,28 +30,28 @@
         <el-row type="flex" justify="start">
           <el-col :span="20">
             <el-form-item label="主机名/IP地址" prop="hostName">
-              <el-input v-model="connectionForm.hostName" size="mini"></el-input>
+              <el-input name="hostName" v-model="connectionForm.hostName" size="mini"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row type="flex" justify="start">
           <el-col :span="11">
             <el-form-item label="端口号" prop="port">
-              <el-input v-model="connectionForm.port" size="mini"></el-input>
+              <el-input name="port" v-model="connectionForm.port" size="mini"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row type="flex" justify="start">
           <el-col :span="17">
             <el-form-item label="用户名" prop="userName">
-              <el-input v-model="connectionForm.userName" size="mini"></el-input>
+              <el-input name="userName" v-model="connectionForm.userName" size="mini"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row type="flex" justify="start">
           <el-col :span="17">
             <el-form-item label="密码" prop="password">
-              <el-input v-model="connectionForm.password" auto-complete="new-password" type="password"
+              <el-input name="password" v-model="connectionForm.password" auto-complete="new-password" type="password"
                         size="mini"></el-input>
             </el-form-item>
           </el-col>
@@ -59,14 +59,14 @@
         <el-row type="flex" justify="start">
           <el-col :span="17">
             <el-form-item label="Schema/数据库" prop="database">
-              <el-input v-model="connectionForm.database" size="mini"></el-input>
+              <el-input name="database" v-model="connectionForm.database" size="mini"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row type="flex" justify="start">
           <el-col :span="17">
             <el-form-item label="编码" prop="encoding">
-              <el-select v-model="connectionForm.encoding" placeholder="请选择" size="mini">
+              <el-select name="encoding" v-model="connectionForm.encoding" placeholder="请选择" size="mini">
                 <el-option
                   v-for="item in optionsEncoding"
                   :key="item.value"
@@ -196,7 +196,7 @@
           </el-row>
         </el-card>
 
-        <el-button type="success">代码生成</el-button>
+        <el-button type="success" @click="generateCode()">代码生成</el-button>
         <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
 
 
@@ -342,13 +342,13 @@
       this.connectionForm =
         {
           index: -1,
-          connectionName: '',
-          databaseType: '',
-          hostName: '',
-          port: '',
-          userName: '',
-          password: '',
-          database: '',
+          connectionName: 'sms_cloud_baseline',
+          databaseType: 'MySQL',
+          hostName: '192.168.109.24',
+          port: 3306,
+          userName: 'root',
+          password: 'xskj2017',
+          database: 'sms_prod',
           encoding: 'UTF-8'
         };
 
@@ -404,6 +404,58 @@
         this.dialogVisible = false;
         this.$refs[form].resetFields();
         this.loadConnection();
+      },
+      generateCode() {
+        let jsonString = {
+          tableName: this.form.tableName,
+          encoding: 'utf-8',
+          mapperName: this.form.mapper.name,
+          primaryKey: this.form.entity.id,
+          dataSource: {
+            databaseType: this.connectionForm.databaseType,
+            hostName: this.connectionForm.hostName,
+            port: this.connectionForm.port,
+            userName: this.connectionForm.userName,
+            password: this.connectionForm.password,
+            database: this.connectionForm.database,
+            encoding: this.connectionForm.encoding
+          },
+          controller: {
+            name: this.form.controller.name,
+            packageName: this.form.controller.packageName,
+            path: this.form.controller.path,
+            isGenerate: this.form.controller.isGenerate
+          },
+          service: {
+            name: this.form.service.name,
+            packageName: this.form.service.packageName,
+            path: this.form.service.path,
+            isGenerate: this.form.service.isGenerate
+          },
+          dto: {
+            name: this.form.dto.name,
+            packageName: this.form.dto.packageName,
+            path: this.form.dto.path,
+            isGenerate: this.form.dto.isGenerate
+          },
+          entity: {
+            name: this.form.entity.name,
+            packageName: this.form.entity.packageName,
+            path: this.form.entity.path,
+            isGenerate: this.form.entity.isGenerate
+          },
+          mapper: {
+            name: this.form.mapper.name,
+            packageName: this.form.mapper.packageName,
+            path: this.form.mapper.path,
+            isGenerate: this.form.mapper.isGenerate
+          }
+        }
+        console.log(this.hostName)
+        doPost(JSON.stringify(jsonString), '/code/generate')
+          .then(res => {
+            console.log(res)
+          })
       },
       handleKey(key) {
         if (getLocalStorage(key) == null) {
