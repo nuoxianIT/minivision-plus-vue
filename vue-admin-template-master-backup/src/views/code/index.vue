@@ -196,7 +196,7 @@
           </el-row>
         </el-card>
 
-        <el-button type="success" @click="generateCode()">代码生成</el-button>
+        <el-button type="success" @click="generateCode(form)">代码生成</el-button>
         <a :download="fileName" :href="filePath" ref="download"></a>
         <el-button type="primary">确定</el-button>
       </el-form>
@@ -406,7 +406,7 @@
         this.$refs[form].resetFields();
         this.loadConnection();
       },
-      generateCode() {
+      generateCode(form) {
         let jsonString = {
           tableName: this.form.tableName,
           encoding: 'utf-8',
@@ -452,12 +452,12 @@
             isGenerate: this.form.mapper.isGenerate
           }
         }
-        console.log(this.hostName)
+        console.log(JSON.stringify(jsonString))
         doPost(JSON.stringify(jsonString), '/code/generate')
           .then(res => {
             var host = window.location.host;
             var path = res.data.data.path;
-            this.filePath = host + path
+            this.filePath = 'http://localhost:8099/reus/file/'+path
             console.log(this.filePath)
             this.$refs.download.click()
           })
